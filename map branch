@@ -1,0 +1,29 @@
+# mtn-brand-map
+Map of Shop with mtn branded merchandise
+import pandas as pd
+import numpy as np
+!pip install folium
+import folium
+from folium.plugins import MarkerCluster
+mtn_file=pd.read_excel('MTN TRADE VISIBILITY.xlsx')
+mtn_latitude=[]
+mtn_longitude=[]
+mtn_details=[]
+for n in range(len(mtn_file)):
+  if mtn_file['Does this outlet have any MTN Branded merchandise?'][n]:
+    mtn_latitude.append(mtn_file.Latitude[n])
+    mtn_longitude.append(mtn_file.Longitude[n])
+    mtn_details.append(mtn_file['What Type of Outlet Is This'][n])
+mtn_df=pd.DataFrame({"Latitude":mtn_latitude,"Longitude":mtn_longitude,"Description":mtn_details})
+mtn_df.Latitude.replace(0,np.nan,inplace=True)
+mtn_df.dropna(subset=["Latitude"],axis=0)
+Map=folium.Map([mtn_df.Latitude[0], mtn_df.Longitude[0]],zoom_start=4)
+marker=MarkerCluster()
+for lat,lon,label in zip(mtn_df.Latitude,mtn_df.Longitude,mtn_df.Description):
+  marker.add_child(folium.Marker(location=[lat,lon], popup=label, icon=folium.Icon(icon='shopping-cart',
+                                  color='orange',icon_color='white',angle=0, prefix='fa'))
+folium.TileLayer('stamentoner').add_to(Map)
+folium.TileLayer('cartodbdark').add_to(Map)
+folium.LayerControl().add_to(Map)
+Map.add_child(marker)
+Map.save('Mtn-brand-map.html')
