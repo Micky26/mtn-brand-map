@@ -1,29 +1,64 @@
 # mtn-brand-map
-Map of Shop with mtn branded merchandise
+#Map of Shop with mtn branded merchandise
+#python 3
 import pandas as pd
 import numpy as np
 !pip install folium
 import folium
 from folium.plugins import MarkerCluster
 mtn_file=pd.read_excel('MTN TRADE VISIBILITY.xlsx')
-mtn_latitude=[]
-mtn_longitude=[]
+mtn_lat1=[]
+mtn_lon1=[]
+mtn_details1=[]
+for n in range(len(mtn_file)):
+    if mtn_file['Does this outlet have any MTN Branded merchandise?'][n]=='YES':
+        if mtn_file['What Type of Outlet Is This'][n]=='Shop & Browse':
+            mtn_lat1.append(mtn_file.Latitude[n])
+            mtn_lon1.append(mtn_file.Longitutde[n])
+            mtn_details1.append(mtn_file['What Type of Outlet Is This'][n])
+mtn_shop=pd.DataFrame({"Latitude":mtn_lat1,"Longitude":mtn_lon1,"Description":mtn_details1})
+mtn_lat2=[]
+mtn_lon2=[]
+mtn_details2=[]
+for n in range(len(mtn_file)):
+    if mtn_file['Does this outlet have any MTN Branded merchandise?'][n]=='YES':
+        if mtn_file['What Type of Outlet Is This'][n]=='Pay & Go':
+            mtn_lat2.append(mtn_file.Latitude[n])
+            mtn_lon2.append(mtn_file.Longitutde[n])
+            mtn_details2.append(mtn_file['What Type of Outlet Is This'][n])
+mtn_pay=pd.DataFrame({"Latitude":mtn_lat2,"Longitude":mtn_lon2,"Description":mtn_details2})
+mtn_lat=[]
+mtn_lon=[]
 mtn_details=[]
 for n in range(len(mtn_file)):
-  if mtn_file['Does this outlet have any MTN Branded merchandise?'][n]:
-    mtn_latitude.append(mtn_file.Latitude[n])
-    mtn_longitude.append(mtn_file.Longitude[n])
-    mtn_details.append(mtn_file['What Type of Outlet Is This'][n])
-mtn_df=pd.DataFrame({"Latitude":mtn_latitude,"Longitude":mtn_longitude,"Description":mtn_details})
-mtn_df.Latitude.replace(0,np.nan,inplace=True)
-mtn_df.dropna(subset=["Latitude"],axis=0)
-Map=folium.Map([mtn_df.Latitude[0], mtn_df.Longitude[0]],zoom_start=4)
+    if mtn_file['Does this outlet have any MTN Branded merchandise?'][n]=='YES':
+        if mtn_file['What Type of Outlet Is This'][n]=='Entertainment':
+            mtn_lat.append(mtn_file.Latitude[n])
+            mtn_lon.append(mtn_file.Longitutde[n])
+            mtn_details.append(mtn_file['What Type of Outlet Is This'][n])
+mtn_ent=pd.DataFrame({"Latitude":mtn_lat,"Longitude":mtn_lon,"Description":mtn_details})
+mtn_shop.Latitude.replace(0,np.nan,inplace=True)
+mtn_shop.dropna(subset=['Latitude'],axis=0,inplace=True)
+mtn_pay.Latitude.replace(0,np.nan,inplace=True)
+mtn_pay.dropna(subset=['Latitude'],axis=0, inplace=True)
+mtn_ent.Latitude.replace(0,np.nan,inplace=True)
+mtn_ent.dropna(subset=['Latitude'],axis=0,inplace=True)
+Map=folium.Map([mtn_shop.Latitude[0],mtn_shop.Longitude[0]],zoom_start=4)
 marker=MarkerCluster()
-for lat,lon,label in zip(mtn_df.Latitude,mtn_df.Longitude,mtn_df.Description):
-  marker.add_child(folium.Marker(location=[lat,lon], popup=label, icon=folium.Icon(icon='shopping-cart',
-                                  color='orange',icon_color='white',angle=0, prefix='fa')))
-folium.TileLayer('stamentoner').add_to(Map)
-folium.TileLayer('cartodbdark').add_to(Map)
-folium.LayerControl().add_to(Map)
+for lat, lon, details in zip(mtn_shop.Latitude,mtn_shop.Longitude,mtn_shop.Description):
+    marker.add_child(folium.Marker(location=[lat,lon],popup=details,
+            icon=folium.Icon(color='beige',icon='shopping-cart',
+            icon_color='white',angle=0,prefix='fa')))
+for lat, lon, details in zip(mtn_pay.Latitude, mtn_pay.Longitude, mtn_pay.Description):
+    marker.add_child(folium.Marker([lat,lon], popup=details, icon=folium.Icon(color='gray',
+                            icon_color='white', icon='shopping-cart')))
+for lat, lon, details in zip(mtn_ent.Latitude, mtn_ent.Longitude, mtn_ent.Description):
+    marker.add_child(folium.Marker([lat,lon], popup=details, icon=folium.Icon(icon='shopping-cart',
+                                                    color='blue', icon_color='white')))
+
 Map.add_child(marker)
-Map.save('Mtn-brand-map.html')
+
+folium.TileLayer('cartodbdark_matter').add_to(Map)
+folium.TileLayer('stamentoner').add_to(Map)
+folium.LayerControl().add_to(Map)
+Map.save('Mtn Map.html')
