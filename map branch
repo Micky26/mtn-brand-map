@@ -21,7 +21,7 @@ Map=folium.Map([mtn_df.Latitude[0], mtn_df.Longitude[0]],zoom_start=4)
 marker=MarkerCluster()
 for lat,lon,label in zip(mtn_df.Latitude,mtn_df.Longitude,mtn_df.Description):
   marker.add_child(folium.Marker(location=[lat,lon], popup=label, icon=folium.Icon(icon='shopping-cart',
-                                  color='orange',icon_color='white',angle=0, prefix='fa'))
+                                  color='orange',icon_color='white',angle=0, prefix='fa')))
 folium.TileLayer('stamentoner').add_to(Map)
 folium.TileLayer('cartodbdark').add_to(Map)
 folium.LayerControl().add_to(Map)
